@@ -3,39 +3,39 @@ import cv2
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimg
 import pickle
-import glob
 
-from helpers import *
 
-# Read the pickle file
-pickle_file = open("camera_cal/camera_cal.p", "rb")
-dist_pickle = pickle.load(pickle_file)
-mtx = dist_pickle["mtx"]  
-dist = dist_pickle["dist"]
+from helper.helpers import *
+
+# Get the camera cal data
+mtx, dist = get_camera_cal()
+
+# Get perpective transform parmeter
+M, Minv = get_perspective_trans()
 
 # Read image
-image = cv2.imread("test_images/test5.jpg")
+image = mpimg.imread("test_images/test5.jpg")
+img_size = (image.shape[1], image.shape[0])
 
 # distort the image
 image_dist = cv2.undistort(image, mtx, dist, None, mtx)
 
 # Undistort the images in test image folder
-image_files = glob.glob("test_images/*.jpg")
-for idx, file in enumerate(image_files):
-	print(file)
-	img = cv2.imread(file)
-	image_dist = cv2.undistort(img, mtx, dist, None, mtx)
-	file_name = file.split("\\")[-1]
-	print(file_name)
-	out_image = "output_images/undistort/"+file_name
-	print(out_image)
-	cv2.imwrite(out_image, image_dist)
+# undistort_images("test_images/", "output_images/undistort/", mtx, dist)
 
+# apply thresholding
+s_thresh=(170,255)
+sx_thresh=(20, 100)
+image_threshed = color_grid_thresh(image_dist, s_thresh=s_thresh, sx_thresh=sx_thresh)
 
-# # apply thresholding
-# s_thresh=(170,255)
-# sx_thresh=(20, 100)
-# image_threshed = color_grid_thresh(image_dist, s_thresh=s_thresh, sx_thresh=sx_thresh)
+# thresh the images in the undistort image folder
+# thresh_images("output_images/undistort/", "output_images/threshed/", s_thresh, sx_thresh)
 
-# plt.imshow(image_threshed, cmap='gray')
+# apply the view_perspective tranform
+image_warped = cv2.warpPerspective(image_threshed, M, img_size, flags=cv2.INTER_LINEAR)
+
+# apply the warp to threshed images
+wrap_image("output_images/threshed/", "output_images/wraped/", M, img_size)
+
+# plt.imshow(image_warped, cmap="gray")
 # plt.show()
