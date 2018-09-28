@@ -62,8 +62,8 @@ pickle.dump(dist_pickle, open("camera_cal.p", "wb"))
 # Visualize undistortion
 f, (ax1,ax2) = plt.subplots(1,2, figsize=(20,10))
 ax1.imshow(img)
-ax1.set_title('Original Image', fontsize=30)
+ax1.set_title('Original Image', fontsize=15)
 ax2.imshow(dst)
-ax2.set_title('Undistored Image', fontsize=30)
+ax2.set_title('Undistored Image', fontsize=15)
 
 plt.show()

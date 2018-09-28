@@ -1,7 +1,7 @@
 ### Calibration the Camera
 
 Using the chessboard images to calibrate the camera.
-the calibration parameter will install into a pickle file for further use.
+the calibration parameter will instore into a pickle file for further use.
 
 ![dist_example](dist_example.png)
 
@@ -15,3 +15,4 @@ the ny is the inner points in y direction
 
 #### Files
 * **camera_balibration** the python scrip which used to calibration the camera.
+* **camera_cal.p** the pickle file which instore the camera_cal parameters
