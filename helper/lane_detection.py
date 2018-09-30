@@ -131,6 +131,20 @@ def fit_polynomial(binary_warped):
 	# print(len(ploty))
 	return out_img
 
+def get_polynomial(leftx, lefty, rightx, righty, img_size):
+
+	left_fit = np.polyfit(lefty, leftx, 2)
+	right_fit = np.polyfit(righty, rightx, 2)
+
+	left_lane_fun = np.poly1d(left_fit)
+	right_lane_fun = np.poly1d(right_fit)
+
+	ploty = ploty = np.linspace(0, img_size[0]-1, img_size[0])
+	left_fitx = left_lane_fun(ploty)
+	right_fitx = right_lane_fun(ploty)
+
+	return left_fitx, right_fitx, ploty
+
 
 ###############################################################################
 # read the image and change to binary(when write binary to RGB *255)

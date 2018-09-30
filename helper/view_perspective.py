@@ -1,3 +1,5 @@
+# use straight_lines1.jpg to generate view_perspective transform parameter M & Minv
+
 import numpy as np 
 import cv2
 import matplotlib.pyplot as plt 
