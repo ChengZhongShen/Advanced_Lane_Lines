@@ -7,6 +7,7 @@ import pickle
 
 from helper.helpers import *
 from helper.lane_detection import *
+from helper.cal_curv import measure_curv, measure_offset
 
 # Get the camera cal data
 mtx, dist = get_camera_cal()
@@ -41,7 +42,12 @@ image_warped = cv2.warpPerspective(image_threshed, M, img_size, flags=cv2.INTER_
 image_fit_line = fit_polynomial(image_warped*255)
 # apply the line fit to 
 
+leftx, lefty, rightx, righty, out_img = find_lane_pixels(image_warped)
 
+left_curverad, right_curverad = measure_curv(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
+offset = measure_offset(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
+print(left_curverad, right_curverad)
+print(offset)
 
-plt.imshow(image_fit_line)
-plt.show()
+# plt.imshow(image_fit_line)
+# plt.show()

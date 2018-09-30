@@ -3,10 +3,6 @@ import cv2
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimg
 
-# read the image and change to binary(when write binary to RGB *255)
-# binary_warped = mpimg.imread('../output_images/wraped/test6.jpg')
-# binary_warped = binary_warped[:,:,0] # get 1 channel, three channel is same
-
 def find_lane_pixels(binary_warped):
 	"""
 	find lane in a binary_warped image
@@ -134,6 +130,12 @@ def fit_polynomial(binary_warped):
 	# print(len(leftx))
 	# print(len(ploty))
 	return out_img
+
+
+###############################################################################
+# read the image and change to binary(when write binary to RGB *255)
+# binary_warped = mpimg.imread('../output_images/wraped/test6.jpg')
+# binary_warped = binary_warped[:,:,0] # get 1 channel, three channel is same
 
 # out_img = fit_polynomial(binary_warped)
 
