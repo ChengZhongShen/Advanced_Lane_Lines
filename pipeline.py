@@ -6,6 +6,7 @@ import pickle
 
 
 from helper.helpers import *
+from helper.lane_detection import *
 
 # Get the camera cal data
 mtx, dist = get_camera_cal()
@@ -14,7 +15,7 @@ mtx, dist = get_camera_cal()
 M, Minv = get_perspective_trans()
 
 # Read image
-image = mpimg.imread("test_images/test5.jpg")
+image = mpimg.imread("test_images/test6.jpg")
 img_size = (image.shape[1], image.shape[0])
 
 # distort the image
@@ -35,7 +36,12 @@ image_threshed = color_grid_thresh(image_dist, s_thresh=s_thresh, sx_thresh=sx_t
 image_warped = cv2.warpPerspective(image_threshed, M, img_size, flags=cv2.INTER_LINEAR)
 
 # apply the warp to threshed images
-wrap_image("output_images/threshed/", "output_images/wraped/", M, img_size)
+# wrap_images("output_images/threshed/", "output_images/wraped/", M, img_size)
 
-# plt.imshow(image_warped, cmap="gray")
-# plt.show()
+image_fit_line = fit_polynomial(image_warped*255)
+# apply the line fit to 
+
+
+
+plt.imshow(image_fit_line)
+plt.show()
