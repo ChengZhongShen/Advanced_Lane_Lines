@@ -70,8 +70,9 @@ def images_test(src, dst):
 		cv2.imwrite(out_image, image_dist)
 
 # one_image_test()
-images_test("test_images/", "output_images/")
+# images_test("test_images/", "output_images/")
 
+############################## not finished
 ## in process test
 # thresh the images in the undistort image folder
 # thresh_images("output_images/undistort/", "output_images/threshed/", s_thresh, sx_thresh)
