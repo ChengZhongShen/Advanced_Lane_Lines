@@ -45,11 +45,21 @@ def pipeline(image):
 	# draw the lane to the undist image
 	result = draw_lane(image_undist, image_warped, Minv, left_fitx, right_fitx, ploty)
 
+	# write curverad and offset on to result image
+	direction = "right" if offset < 0 else "left"
+	str_cur = "Radius of Curvature = {0:.2f}(m)".format(curverad)
+	str_offset = "Vehicle is {0:.2f}m ".format(offset) + "{} of center".format(direction)
+	cv2.putText(result, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
+	cv2.putText(result, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
+
 	return result
+
 
 ##################################################
 def one_image_test():
-
+	'''
+	test the pipeline in one picture and show the result
+	'''
 	image = mpimg.imread("test_images/test6.jpg")
 
 	result = pipeline(image)
@@ -57,6 +67,10 @@ def one_image_test():
 	plt.show()
 
 def images_test(src, dst):
+	'''
+	test the pipeline on src folder's images 
+	write the result to the dst folder
+	'''
 	image_files = glob.glob(src+"*.jpg")
 	for idx, file in enumerate(image_files):
 		print("handle on: ", file)
@@ -70,7 +84,7 @@ def images_test(src, dst):
 		cv2.imwrite(out_image, image_dist)
 
 # one_image_test()
-# images_test("test_images/", "output_images/")
+images_test("test_images/", "output_images/")
 
 ############################## not finished
 ## in process test
