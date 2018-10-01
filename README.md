@@ -1,6 +1,8 @@
 
 **Advanced Lane Finding Project**
 
+Note: this is Udacity Nano Degree project, please refer to [Udacity Repository](https://github.com/udacity/CarND-Advanced-Lane-Lines.git) for the project information and requirements.
+
 The goals / steps of this project are the following:
 
 * Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
@@ -12,15 +14,6 @@ The goals / steps of this project are the following:
 * Warp the detected lane boundaries back onto the original image.
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
-[//]: # (Image References)
-
-[image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -28,97 +21,161 @@ The goals / steps of this project are the following:
 
 ---
 
-### Writeup / README
-
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
-
-You're reading it!
-
 ### Camera Calibration
 
-#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+#### 1. use the **opencv** `findChessboardCorners()` and "`calibrateCamera()` funtion to implement the camera calibration.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+The code for this step in the `camera_calibration.py` which located in **camera_cal** folder.  
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+In the function main(), the proces as below:
+* prepare the `objp[]`, which is same matrix as chessboard X6
+* create list `objepiont[]` and `imgpionts[]` to hold the 3D and 2D pioints.
+* go through all the calibration image to search for conerner. use opencv `findChessboardCorners` function.
+* use opencv `calibratteCamera()` to get `mtx` and `dist` 
+* write the calibration paramter to a pickle file *camera_cal.p*
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+To test if the pickle file which contain the 'mtx' and 'dist' work. use the `test()` function to test and visualize the result.
+* read the pickle and load the `mtx` and `dist`
+* read test image
+* use `cv2.undistort()` to undistort the test image.
+the result as below 
 
-![alt text][image1]
+![undistort_image](./camera_cal/undistort_example.png)
 
 ### Pipeline (single images)
 
-#### 1. Provide an example of a distortion-corrected image.
+`pipeline.py` include the function `pipeline()` which used to handle the image, the process described below:
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+#### 1. distortion-corrected image.
 
-#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+use the paremeter from pickfel *camera_cal.p* (this is done by the function: `get_camera_cal()`) use the `cv2.undistort` to get the undistort image,the image showed below(resized to 640X360 to fit the file.):
+![undistort_image](./output_images/undistort/test6_resize.jpg)
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+#### 2. Threshold the image.
 
-![alt text][image3]
+all the image process code is in the `image_process.py`
+in the pipeline it use the funtion import from `image_process.py`
+```
+s_thresh=(170,255)
+sx_thresh=(20, 100)
+image_threshed = color_grid_thresh(image_undist, s_thresh=s_thresh, sx_thresh=sx_thresh)
 
-#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+```
+this is a combination of color and gradient thresholds to generate a binary image.
+in color: it use a HLS's s channel, for gradient, use x direction gradient. 
+the detialed code is in the `image_process.py`, function `color_grid_thresh`, after apply the threshold, the image as below.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+![alt text](./output_images/threshed/test6_resize.jpg)
 
-#### Note, not find the change in two images, undistored.
+
+#### 3. perspective transform
+
+to implement perspective tranform, first need get the tranform parameter `M` and `Minv`.
+This is done by the `view_perspective.py`, just like camera_cal, get the parameter then write into a pickle file for further use.
+
+the view transform use manully adjust the 4 source piont.
+after server time adjust, the 4 poinst as below.
 
 ```python
 src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
+    [[(img_size[0] / 2) - 63, img_size[1] / 2 + 100],
+    [((img_size[0] / 6) - 20), img_size[1]],
     [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
+    [(img_size[0] / 2 + 65), img_size[1] / 2 + 100]])
 dst = np.float32(
     [[(img_size[0] / 4), 0],
     [(img_size[0] / 4), img_size[1]],
     [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+    [(img_size[0] * 3 / 4), 0]])	
+```
+![alt text](./helper/view_tran.png)
+
+To test the pickle file and tansform work well, use the test() function to test, the result is at [wrapped_color](./output_images/wraped_color)
+
+
+#### 4. lane-line pixels detection and fit their positions with a polynomial
+
+the `lane_detection.py` implement the lane-line pixels detection.
+the function `find_lane_pixels()` use a slide window to find the lane-line pixels. 
+after get the lane_pixels, use `np.polyfit()` to get polynomial paratmeters, this is done in `get_polynomial` in the example, it like below. `[A B C]`
+```python
+[ 1.42425935e-04 -3.09709625e-01  5.13026355e+02]
+[ 1.96100345e-04 -2.96906479e-01  1.12235500e+03]
 ```
 
-This resulted in the following source and destination points:
+to visualize the search result and fit polynomial, use `fit_polynomial()` function. the visualized result as below. show the search window/lane pixels/fit polynimial.
 
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+![alt text](./output_images/lane_search/test6.png)
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+#### 5. Calculate the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-![alt text][image4]
+the cacualtion is done in the `cal_curv.py`, the function `measure_curv()` used to calculate radius.
 
-#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+first, transform the lane piont from pixels to meters.
+```python
+# Transform pixel to meters
+leftx = leftx * xm_per_pix
+lefty = lefty * ym_per_pix
+rightx = rightx * xm_per_pix
+righty = righty * ym_per_pix
+```
+then fit these data use `np.polyfit()`
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+after get the polynomial parameter, use the function R = (1+(2Ay+B)^2)^3/2 / (|2A|)
 
-![alt text][image5]
+for the offset, it is similar, tranfer pixel to meter, compare the lane center with picture center to get offse. these are in the function `measure_offset()`
 
-#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+#### 6. Plot lane area and display the radius and offset.
 
-#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+In the `pipeline`, use below code to visualzie the lane and caculation.
+```python
+# draw the lane to the undist image
+	result = draw_lane_find(image_undist, image_warped, Minv, leftx, lefty, rightx, righty)
+	result = draw_lane_fit(result, image_warped, Minv, left_fitx, right_fitx, ploty)
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+	# write curverad and offset on to result image
+	direction = "right" if offset < 0 else "left"
+	str_cur = "Radius of Curvature = {0:.2f}(m)".format(curverad)
+	str_offset = "Vehicle is {0:.2f}m ".format(offset) + "{} of center".format(direction)
+	cv2.putText(result, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
+	cv2.putText(result, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
 
-![alt text][image6]
+```
+
+The result as below picture.
+![alt text](./output_images/test6_resize.jpg)
 
 ---
 
 ### Pipeline (video)
 
-#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+this is done by the `video.py`, generate the video using pipeline.
 
-Here's a [link to my video result](./project_video.mp4)
+#### 1.video output
+
+Here's a [link to my video result](./output_vidoe/project_video.mp4)
 
 ---
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. the current pipeline don't has the check method to verify if the searched lane is correct or reasonal.
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+should check the founded lane is reasonable and discard the wrong finding.
+
+---
+
+### Folders and Files
+
+* **camera_cal** the code which calibration the camera
+* **examples** some example pictures
+* **helper** all the functions which used in **pipeline.py** and **video.py**
+* **output_images** the images which processed by diff function.
+* **output_video** the video has finished
+* **test_images** the images used to test the pipeline
+* **test_video** three video for testing the lane detection
+
+* **pipeline.py** the code which use to hande the images. the actual lane dection happend.
+* **requirement.txt** the python package list in local machine
+* **video.py** the code with use "pipeline" to handle the vidoe and generate the output video.

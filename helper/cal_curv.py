@@ -100,18 +100,20 @@ def measure_offset(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3
 	return offset
 
 
+def test():
+	leftx, lefty, rightx, righty = generate_data()
+	left_curverad, right_curverad = measure_curv(leftx, lefty, rightx, righty)
+	offset = measure_offset(leftx, lefty, rightx, righty)
 
+	print(left_curverad, 'm', right_curverad, 'm')
+	print("offset is: ", offset, "m")
+
+if __name__ == '__main__':
+	test()
+	
 # #######################################################################################
-# # Test the fucntions
 # # Calculate the radius of curvature in meters for both lane line
 # # Should see values of 533.75 and 648.16 here, if using
 # # the default `generate_data` function with given seed number
 # # the offset should be 1280/2 - (200+900)/2 = 90 90*3.7/700=-0.4757(-0.4925)
-# leftx, lefty, rightx, righty = generate_data()
-# left_curverad, right_curverad = measure_curv(leftx, lefty, rightx, righty)
-
-# offset = measure_offset(leftx, lefty, rightx, righty)
-
-# print(left_curverad, 'm', right_curverad, 'm')
-# print("offset is: ", offset, "m")
 # ########################################################################################

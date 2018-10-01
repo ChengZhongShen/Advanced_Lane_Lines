@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimg
+import glob
 
 def find_lane_pixels(binary_warped):
 	"""
@@ -107,8 +108,8 @@ def fit_polynomial(binary_warped):
 	# line fit use np.ployfit, second order, note lefty is x, leftx is y, later use ploty to get plotx
 	left_fit = np.polyfit(lefty, leftx, 2)
 	right_fit = np.polyfit(righty, rightx, 2)
-	# print(left_fit)
-	# print(right_fit)
+	print(left_fit)
+	print(right_fit)
 
 	left_lane_fun = np.poly1d(left_fit)
 	right_lane_fun = np.poly1d(right_fit)

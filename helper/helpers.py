@@ -13,6 +13,7 @@ def get_camera_cal():
 	dist_pickle = pickle.load(pickle_file)
 	mtx = dist_pickle["mtx"]  
 	dist = dist_pickle["dist"]
+	pickle_file.close()
 
 	return mtx, dist
 

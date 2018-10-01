@@ -86,8 +86,8 @@ def images_test(src, dst):
 
 
 if __name__ == '__main__':
-	# one_image_test()
-	images_test("test_images/", "output_images/")
+	one_image_test()
+	# images_test("test_images/", "output_images/")
 
 ############################## not finished
 ## in process test
