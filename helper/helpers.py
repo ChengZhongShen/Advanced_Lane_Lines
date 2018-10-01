@@ -9,7 +9,7 @@ def get_camera_cal():
 	"""
 	Read the picke file and return the mtx, dist to caller
 	"""
-	pickle_file = open("camera_cal/camera_cal.p", "rb")
+	pickle_file = open("./camera_cal/camera_cal.p", "rb")
 	dist_pickle = pickle.load(pickle_file)
 	mtx = dist_pickle["mtx"]  
 	dist = dist_pickle["dist"]
@@ -20,7 +20,7 @@ def get_perspective_trans():
 	"""
 	Read the pickle file and return the M, Minv to caller
 	"""
-	pickle_file = open("helper/trans_pickle.p", "rb")
+	pickle_file = open("./helper/trans_pickle.p", "rb")
 	trans_pickle = pickle.load(pickle_file)
 	M = trans_pickle["M"]  
 	Minv = trans_pickle["Minv"]

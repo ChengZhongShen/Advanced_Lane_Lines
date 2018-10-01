@@ -6,7 +6,7 @@ import pickle
 import glob
 
 from helper.helpers import get_camera_cal, get_perspective_trans
-from helper.image_process import color_grid_thresh, draw_lane
+from helper.image_process import color_grid_thresh, draw_lane_fit, draw_lane_find
 from helper.lane_detection import find_lane_pixels, get_polynomial
 from helper.cal_curv import measure_curv, measure_offset
 
@@ -43,7 +43,8 @@ def pipeline(image):
 	left_fitx, right_fitx, ploty = get_polynomial(leftx, lefty, rightx, righty, img_size)
 
 	# draw the lane to the undist image
-	result = draw_lane(image_undist, image_warped, Minv, left_fitx, right_fitx, ploty)
+	result = draw_lane_find(image_undist, image_warped, Minv, leftx, lefty, rightx, righty)
+	result = draw_lane_fit(result, image_warped, Minv, left_fitx, right_fitx, ploty)
 
 	# write curverad and offset on to result image
 	direction = "right" if offset < 0 else "left"
@@ -83,8 +84,10 @@ def images_test(src, dst):
 		image_dist = cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
 		cv2.imwrite(out_image, image_dist)
 
-# one_image_test()
-images_test("test_images/", "output_images/")
+
+if __name__ == '__main__':
+	# one_image_test()
+	images_test("test_images/", "output_images/")
 
 ############################## not finished
 ## in process test

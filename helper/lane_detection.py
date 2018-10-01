@@ -147,11 +147,16 @@ def get_polynomial(leftx, lefty, rightx, righty, img_size):
 
 
 ###############################################################################
-# read the image and change to binary(when write binary to RGB *255)
-# binary_warped = mpimg.imread('../output_images/wraped/test6.jpg')
-# binary_warped = binary_warped[:,:,0] # get 1 channel, three channel is same
+def test():
+	# read the image and change to binary(when write binary to RGB *255)
+	binary_warped = mpimg.imread('../output_images/wraped/test6.jpg')
+	binary_warped = binary_warped[:,:,0] # get 1 channel, three channel is same
 
-# out_img = fit_polynomial(binary_warped)
+	out_img = fit_polynomial(binary_warped)
 
-# plt.imshow(out_img)
-# plt.show()
+	plt.imshow(out_img)
+	plt.show()
+
+
+if __name__ == '__main__':
+	test()
