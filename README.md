@@ -159,7 +159,7 @@ this is done by the `video.py`, generate the video using pipeline.
 
 #### 1.video output version1
 
-With current threshold and setup, most of the time it work for the project vidoe.
+With current threshold and setup, most of the time it work for the project video.
 Here's a [link to my video result](./output_video/v1/project_video.mp4)
 
 But in some frame, the lan detection failed, as below picuture shows
@@ -186,17 +186,23 @@ The videos with debug window could find [here](./output_video/v1_with_debug_wind
 
 ### 2. improvement the pipeline with lane check
 
-
+if the lane check is OK, attach the result to `pipeline.left` and `pipeline.right`.
 ```python
 # tranform calibration distence 1280/2 is 640, 5%(610-670) is good search, 15%(545-730) is detected
 	if ((lane_distance_bot < 545) or (lane_distance_bot > 730)): flag = False
 	if ((lane_distance_mid < 545) or (lane_distance_mid > 730)): flag = False
-	if ((lane_distance_top < 545) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
+	if ((lane_distance_top < 500) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
 ```
+when lane detect is False. use the recent data to project the lane area and culcualte the lane radius and car offset.
+one detect failure and use recent data project as below picture show.
+[detect_fail_projected](./examples/576_resize.jpg)
 
 ---
 
 ### Discussion
+
+#### 1. the challenge_video.
+	current pipeline not worked for challenge_video. need further work on chanllenge_video
 
 ---
 

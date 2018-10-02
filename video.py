@@ -50,6 +50,6 @@ if __name__ == "__main__":
 	# gen_video("harder_challenge_video.mp4", subclip=False)
 	# gen_video("challenge_video.mp4", subclip=False)
 	# gen_video_tracker("project_video.mp4", subclip=True) 
-	gen_video_tracker("project_video.mp4", subclip=False)
-	# gen_video_tracker("challenge_video.mp4", subclip=False) 
+	# gen_video_tracker("project_video.mp4", subclip=False)
+	gen_video_tracker("challenge_video.mp4", subclip=False) 
 	# gen_video_tracker("harder_challenge_video.mp4", subclip=False)  
