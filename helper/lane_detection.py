@@ -18,7 +18,7 @@ def find_lane_pixels(binary_warped):
 	# plt.show()
 
 	# Create an output image to draw on and visualize the result
-	out_img = np.dstack((binary_warped, binary_warped, binary_warped))
+	out_img = np.dstack((binary_warped, binary_warped, binary_warped))*255
 
 	# Find the peak of the left and right havleve of the histogram
 	# These will be the starting point for the left and right lines
@@ -108,8 +108,8 @@ def fit_polynomial(binary_warped):
 	# line fit use np.ployfit, second order, note lefty is x, leftx is y, later use ploty to get plotx
 	left_fit = np.polyfit(lefty, leftx, 2)
 	right_fit = np.polyfit(righty, rightx, 2)
-	print(left_fit)
-	print(right_fit)
+	# print(left_fit)
+	# print(right_fit)
 
 	left_lane_fun = np.poly1d(left_fit)
 	right_lane_fun = np.poly1d(right_fit)
@@ -124,9 +124,14 @@ def fit_polynomial(binary_warped):
 	out_img[lefty, leftx] = [255, 0, 0]
 	out_img[righty, rightx] = [0 ,0 , 255]
 
+	# draw fit line(sue 9 stright line)
+	for i in range(0, 9):
+		cv2.line(out_img, (int(left_plotx[i*79]), int(ploty[i*79])), (int(left_plotx[(i+1)*79]), int(ploty[(i+1)*79])), (255,255,0),2)
+		cv2.line(out_img, (int(right_plotx[i*79]), int(ploty[i*79])), (int(right_plotx[(i+1)*79]), int(ploty[(i+1)*79])), (255,255,0),2)
+
 	# Plots the left and right polynomials on the lane lines
-	plt.plot(left_plotx, ploty, color='yellow')
-	plt.plot(right_plotx, ploty, color='yellow')
+	# plt.plot(left_plotx, ploty, color='yellow')
+	# plt.plot(right_plotx, ploty, color='yellow')
 
 	# print(len(leftx))
 	# print(len(ploty))
@@ -146,6 +151,26 @@ def get_polynomial(leftx, lefty, rightx, righty, img_size):
 
 	return left_fitx, right_fitx, ploty
 
+def lane_sanity_check(left_fitx, right_fitx, ploty, left_curverad, right_curverad):
+	'''
+	1. checking that they have similar curvature margin 10%
+	2. checking that they are separated by approximately right distance horizontally
+	tranform calibration distence 1280/2 margin 640, 5%(610-670) is good search, 15%(545-730) is detected
+	3. Checking that they are roughly parallel, check the another side if 1280/4 margin 10%
+	'''
+	flag = True
+	curvature_diff = (abs(left_curverad-right_curverad))/((left_curverad+right_curverad)/2)
+	lane_distance_bot = right_fitx[720] - left_fitx[720]
+	lane_distance_mid = right_fitx[320] - left_fitx[320]
+	lane_distance_top = right_fitx[0] - left_fitx[0]
+	
+	# if curvature_diff > 0.2: flag = False 
+	if ((lane_distance_bot < 545) or (lane_distance_bot > 730)): flag = False
+	if ((lane_distance_mid < 545) or (lane_distance_mid > 730)): flag = False
+	if ((lane_distance_top < 545) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
+
+	return flag, curvature_diff, lane_distance_bot, lane_distance_mid, lane_distance_top
+
 
 ###############################################################################
 def test():
@@ -158,6 +183,27 @@ def test():
 	plt.imshow(out_img)
 	plt.show()
 
+def test():
+	# read the image and change to binary(when write binary to RGB *255)
+	binary_warped = mpimg.imread('../output_images/wraped/test6.jpg')
+	binary_warped = binary_warped[:,:,0] # get 1 channel, three channel is same
+
+	from cal_curv import measure_curv
+	img_size = (binary_warped.shape[1], binary_warped.shape[0])
+	leftx, lefty, rightx, righty, out_img = find_lane_pixels(binary_warped)
+	left_fitx, right_fitx, ploty = get_polynomial(leftx, lefty, rightx, righty, img_size)
+	left_curverad, right_curverad = measure_curv(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
+	flag, curvature_diff, lane_distance_bot, lane_distance_mid, lane_distance_top = lane_sanity_check(left_fitx, right_fitx, ploty, left_curverad, right_curverad)
+
+	cur_left = "left: {}".format(int(left_curverad))
+	cur_right = "right: {}".format(int(right_curverad))
+	info_str = "{}, {}, {}, {}, {}".format(flag, int(curvature_diff*100), int(lane_distance_bot), int(lane_distance_mid), int(lane_distance_top))
+	out_img = fit_polynomial(binary_warped)
+	cv2.putText(out_img,cur_left, (50,580), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
+	cv2.putText(out_img,cur_right, (50,640), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
+	cv2.putText(out_img,info_str, (50,700), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
+	plt.imshow(out_img)
+	plt.show()
 
 if __name__ == '__main__':
 	test()

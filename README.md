@@ -12,12 +12,7 @@ The goals / steps of this project are the following:
 * Detect lane pixels and fit to find the lane boundary.
 * Determine the curvature of the lane and vehicle position with respect to center.
 * Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
-
-
-## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
-
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. 
 
 ---
 
@@ -26,8 +21,9 @@ The goals / steps of this project are the following:
 #### 1. use the **opencv** `findChessboardCorners()` and "`calibrateCamera()` funtion to implement the camera calibration.
 
 The code for this step in the `camera_calibration.py` which located in **camera_cal** folder.  
+run the `camera_calibration.py` to process the calibration.
 
-In the function main(), the proces as below:
+In the function calibriate(), the process as below:
 * prepare the `objp[]`, which is same matrix as chessboard X6
 * create list `objepiont[]` and `imgpionts[]` to hold the 3D and 2D pioints.
 * go through all the calibration image to search for conerner. use opencv `findChessboardCorners` function.
@@ -44,24 +40,25 @@ the result as below
 
 ### Pipeline (single images)
 
-`pipeline.py` include the function `pipeline()` which used to handle the image, the process described below:
+`pipeline.py` include the function `pipeline()` which used to handle the image. You could run "pipeline.py" to see the pipeline effect.
+
+The process described below:
 
 #### 1. distortion-corrected image.
 
-use the paremeter from pickfel *camera_cal.p* (this is done by the function: `get_camera_cal()`) use the `cv2.undistort` to get the undistort image,the image showed below(resized to 640X360 to fit the file.):
+use the paremeter from pickle file *camera_cal.p* (this is done by the function: `get_camera_cal()`) use the `cv2.undistort` to get the undistort image,the image showed below(resized to 640X360 to fit the file.):
 ![undistort_image](./output_images/undistort/test6_resize.jpg)
 
 #### 2. Threshold the image.
 
-all the image process code is in the `image_process.py`
+All the image process code is in the `image_process.py`
 in the pipeline it use the funtion import from `image_process.py`
 ```
 s_thresh=(170,255)
 sx_thresh=(20, 100)
 image_threshed = color_grid_thresh(image_undist, s_thresh=s_thresh, sx_thresh=sx_thresh)
-
 ```
-this is a combination of color and gradient thresholds to generate a binary image.
+This is a combination of color and gradient thresholds to generate a binary image.
 in color: it use a HLS's s channel, for gradient, use x direction gradient. 
 the detialed code is in the `image_process.py`, function `color_grid_thresh`, after apply the threshold, the image as below.
 
@@ -70,11 +67,12 @@ the detialed code is in the `image_process.py`, function `color_grid_thresh`, af
 
 #### 3. perspective transform
 
-to implement perspective tranform, first need get the tranform parameter `M` and `Minv`.
+To implement perspective tranform, first need get the tranform parameter `M` and `Minv`.
 This is done by the `view_perspective.py`, just like camera_cal, get the parameter then write into a pickle file for further use.
+You could run "view_perspective.py" to see the transform.
 
 the view transform use manully adjust the 4 source piont.
-after server time adjust, the 4 poinst as below.
+after serveral times adjust, the 4 poinst as below.
 
 ```python
 src = np.float32(
@@ -91,6 +89,9 @@ dst = np.float32(
 ![alt text](./helper/view_tran.png)
 
 To test the pickle file and tansform work well, use the test() function to test, the result is at [wrapped_color](./output_images/wraped_color)
+
+The wraped binary image as below
+![warpped_binary](./output_images/wraped/test6_resize.jpg)
 
 
 #### 4. lane-line pixels detection and fit their positions with a polynomial
@@ -152,9 +153,13 @@ The result as below picture.
 
 this is done by the `video.py`, generate the video using pipeline.
 
-#### 1.video output
+#### 1.video output version1
 
-Here's a [link to my video result](./output_vidoe/project_video.mp4)
+With current threshold and setup, most of the time it work for the project vidoe.
+Here's a [link to my video result](./output_vidoe/v1/project_video.mp4)
+
+But in some frame, the lan detection failed, as below picuture shows
+![detect fail](./examples/project_detect_fail_resize.png), the full size picture is [link to full size picture](./examples/project_detect_fail.png)
 
 ---
 
@@ -163,6 +168,19 @@ Here's a [link to my video result](./output_vidoe/project_video.mp4)
 #### 1. the current pipeline don't has the check method to verify if the searched lane is correct or reasonal.
 
 should check the founded lane is reasonable and discard the wrong finding.
+check the lane at y postion **720/bot, 360/mid, 0/top** the lane pixel distence and project to the final result picture for debug.
+```python
+# tranform calibration distence 1280/2 is 640, 5%(610-670) is good search, 15%(545-730) is detected
+	if ((lane_distance_bot < 545) or (lane_distance_bot > 730)): flag = False
+	if ((lane_distance_mid < 545) or (lane_distance_mid > 730)): flag = False
+	if ((lane_distance_top < 545) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
+```
+the debug picture as below, the full size could find [here](./examples/project_detect_fail_with_debug.png)
+![detect_fail_debug](./examples/project_detect_fail_with_debug_resize.png)
+
+The videos with debug window could find [here](./output_video/v1_with_debug_window/project_video.mp4)
+
+### 2. improvement the pipeline with lane check
 
 ---
 

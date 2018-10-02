@@ -12,4 +12,7 @@ if __name__ == "__main__":
 	# resize("../output_images/undistort/test6.jpg", "../output_images/undistort/test6_resize.jpg") 
 	# resize("../output_images/threshed/test6.jpg", "../output_images/threshed/test6_resize.jpg") 
 	# resize("../output_images/wraped/test6.jpg", "../output_images/wraped/test6_resize.jpg") 
-	resize("../output_images/test6.jpg", "../output_images/test6_resize.jpg") 
+	# resize("../output_images/test6.jpg", "../output_images/test6_resize.jpg") 
+	# resize("../examples/project_detect_fail.png", "../examples/project_detect_fail_resize.png") 
+	resize("../examples/project_detect_fail_with_debug.png", "../examples/project_detect_fail_with_debug_resize.png") 
+

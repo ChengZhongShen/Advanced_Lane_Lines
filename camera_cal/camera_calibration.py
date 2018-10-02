@@ -7,7 +7,7 @@ import glob
 import matplotlib.pyplot as plt
 import pickle
 
-def main(drawconer=False):
+def calibrate(drawconer=False):
 	'''
 	read the calibration image and do the camera calibration
 	and output the result to a pickle file.
@@ -92,6 +92,6 @@ def test():
 	plt.show()
 
 if __name__ == '__main__':
-	# main(drawconer=False)	# read the chessboard file and get mtx, dist and write to pickle fiel
-	# main(drawconer=True)
-	test()	# read the pickle file and undistort an image.
+	calibrate(drawconer=False)	# read the chessboard file and get mtx, dist and write to pickle fiel
+	# calibrate(drawconer=True)
+	# test()	# read the pickle file and undistort an image.
