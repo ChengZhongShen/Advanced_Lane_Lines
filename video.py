@@ -42,6 +42,7 @@ def gen_video_tracker(video, subclip=False):
 	white_clip.write_videofile(white_output, audio=False)
 
 	print("processed", pipeline.image_counter, "images")
+	print("Detected Failure: ", pipeline.detected_fail_counter)
 
 if __name__ == "__main__":
 	# gen_video("project_video.mp4", subclip=True)
@@ -49,6 +50,6 @@ if __name__ == "__main__":
 	# gen_video("harder_challenge_video.mp4", subclip=False)
 	# gen_video("challenge_video.mp4", subclip=False)
 	# gen_video_tracker("project_video.mp4", subclip=True) 
-	# gen_video_tracker("project_video.mp4", subclip=False)
+	gen_video_tracker("project_video.mp4", subclip=False)
 	# gen_video_tracker("challenge_video.mp4", subclip=False) 
-	gen_video_tracker("harder_challenge_video.mp4", subclip=False)  
+	# gen_video_tracker("harder_challenge_video.mp4", subclip=False)  

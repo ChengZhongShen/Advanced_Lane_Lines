@@ -91,6 +91,7 @@ dst = np.float32(
 To test the pickle file and tansform work well, use the test() function to test, the result is at [wrapped_color](./output_images/wraped_color)
 
 The wraped binary image as below
+
 ![warpped_binary](./output_images/wraped/test6_resize.jpg)
 
 
@@ -145,7 +146,10 @@ In the `pipeline`, use below code to visualzie the lane and caculation.
 ```
 
 The result as below picture.
+
 ![alt text](./output_images/test6_resize.jpg)
+
+with currect pipeline, it works on all the test images. you could find the find at [images_pipeline_tested](./output_images)
 
 ---
 
@@ -156,31 +160,43 @@ this is done by the `video.py`, generate the video using pipeline.
 #### 1.video output version1
 
 With current threshold and setup, most of the time it work for the project vidoe.
-Here's a [link to my video result](./output_vidoe/v1/project_video.mp4)
+Here's a [link to my video result](./output_video/v1/project_video.mp4)
 
 But in some frame, the lan detection failed, as below picuture shows
 ![detect fail](./examples/project_detect_fail_resize.png), the full size picture is [link to full size picture](./examples/project_detect_fail.png)
 
 ---
 
-### Discussion
-
-#### 1. the current pipeline don't has the check method to verify if the searched lane is correct or reasonal.
+#### 2. the current pipeline don't has the check method to verify if the searched lane is correct or reasonal.
 
 should check the founded lane is reasonable and discard the wrong finding.
 check the lane at y postion **720/bot, 360/mid, 0/top** the lane pixel distence and project to the final result picture for debug.
+build the function `lane_sanity_check()` in `lane_detection.py`
+
 ```python
-# tranform calibration distence 1280/2 is 640, 5%(610-670) is good search, 15%(545-730) is detected
-	if ((lane_distance_bot < 545) or (lane_distance_bot > 730)): flag = False
-	if ((lane_distance_mid < 545) or (lane_distance_mid > 730)): flag = False
-	if ((lane_distance_top < 545) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
+	lane_distance_bot = right_fitx[720] - left_fitx[720]
+	lane_distance_mid = right_fitx[320] - left_fitx[320]
+	lane_distance_top = right_fitx[0] - left_fitx[0]
 ```
+
 the debug picture as below, the full size could find [here](./examples/project_detect_fail_with_debug.png)
 ![detect_fail_debug](./examples/project_detect_fail_with_debug_resize.png)
 
 The videos with debug window could find [here](./output_video/v1_with_debug_window/project_video.mp4)
 
 ### 2. improvement the pipeline with lane check
+
+
+```python
+# tranform calibration distence 1280/2 is 640, 5%(610-670) is good search, 15%(545-730) is detected
+	if ((lane_distance_bot < 545) or (lane_distance_bot > 730)): flag = False
+	if ((lane_distance_mid < 545) or (lane_distance_mid > 730)): flag = False
+	if ((lane_distance_top < 545) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
+```
+
+---
+
+### Discussion
 
 ---
 

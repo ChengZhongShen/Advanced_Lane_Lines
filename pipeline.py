@@ -115,9 +115,9 @@ class Line():
 		# difference in fit coefficients between last and new fits
 		self.diffs = np.array([0,0,0], dtype='float')
 		# x values for detected line pixels
-		self.allx = None
+		self.allx = []
 		# y values for detected line pixels
-		self.ally = None
+		self.ally = []
 
 
 class Pipeline():
@@ -134,6 +134,7 @@ class Pipeline():
 		self.right = right
 		# the image counter
 		self.image_counter = 0
+		self.detected_fail_counter = 0
 	
 	def pipeline(self, image):
 		# counter the image
@@ -159,50 +160,74 @@ class Pipeline():
 		left_fitx, right_fitx, ploty = get_polynomial(leftx, lefty, rightx, righty, img_size)
 
 		# sanity Check
-		# First check if the fit line base x is in range.
-		self.left.detected = False if left_fitx[-1] < 100 else True
-		self.right.detected = False if right_fitx[-1] > 1180 else True
-
+		detected, lane_distance_bot, lane_distance_mid, lane_distance_top = lane_sanity_check(left_fitx, right_fitx, ploty)
 		
+		if detected:
+
+			# store the left_fitx, right_fitx
+			self.left.recent_xfitted.append(left_fitx)
+			self.right.recent_xfitted.append(right_fitx)
+			# store the leftx, lefty, rightx, righty
+			self.left.allx.append(leftx)
+			self.left.ally.append(lefty)
+			self.right.allx.append(rightx)
+			self.right.ally.append(righty)
 
 
-		# if (self.left.detected and self.right.detected): # use the detect data for cal
-		if 1:
-			# measure the curverad and offset
-			left_curverad, right_curverad = measure_curv(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
-			curverad = (left_curverad + right_curverad) / 2
-			offset = measure_offset(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
+		else:	# use previous data
+			self.detected_fail_counter += 1
+			# use the recent_xfitted
+			left_fitx = self.left.recent_xfitted[-1]
+			right_fitx = self.right.recent_xfitted[-1]
+			# use the recent pionts
+			leftx = self.left.allx[-1]
+			lefty = self.left.ally[-1]
+			rightx = self.right.allx[-1]
+			righty = self.right.ally[-1]
 
-			# draw the lane to the undist image
+
+		# measure the curverad and offset
+		left_curverad, right_curverad = measure_curv(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
+		curverad = (left_curverad + right_curverad) / 2
+		offset = measure_offset(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
+
+		# draw the lane to the undist image
+		if detected:	# only draw the detected pionts
 			result = draw_lane_find(image_undist, image_warped, Minv, leftx, lefty, rightx, righty)
 			result = draw_lane_fit(result, image_warped, Minv, left_fitx, right_fitx, ploty)
+		else:
+			result = draw_lane_fit(image_undist, image_warped, Minv, left_fitx, right_fitx, ploty)
 
-			# write curverad and offset on to result image
-			direction = "right" if offset < 0 else "left"
-			str_cur = "Radius of Curvature = {0:.2f}(m)".format(curverad)
-			str_offset = "Vehicle is {0:.2f}m ".format(offset) + "{} of center".format(direction)
-			cv2.putText(result, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
-			cv2.putText(result, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
-		else:	# use previous data
-			result = image_undist # do nothing firstly
+		# write curverad and offset on to result image
+		direction = "right" if offset < 0 else "left"
+		str_cur = "Radius of Curvature = {}(m)".format(int(curverad))
+		str_offset = "Vehicle is {0:.2f}m ".format(offset) + "{} of center".format(direction)
+		cv2.putText(result, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
+		cv2.putText(result, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
 
-		# the right-up corner window for debug.
-		fit_image = fit_polynomial(image_warped)
+		# #########################################################
+		# # the right-up corner window for debug.
+		# fit_image = fit_polynomial(image_warped)
 		
-		# santiy check
-		flag, curvature_diff, lane_distance_bot, lane_distance_mid, lane_distance_top = lane_sanity_check(left_fitx, right_fitx, ploty, left_curverad, right_curverad)
-		
-		cur_left = "left: {}".format(int(left_curverad))
-		cur_right = "right: {}".format(int(right_curverad))
-		info_str = "{}, {}, {}, {}, {}".format(flag, int(curvature_diff*100), int(lane_distance_bot), int(lane_distance_mid), int(lane_distance_top))
+		# # santiy check window			
+		# cur_left = "left: {}".format(int(left_curverad))
+		# cur_right = "right: {}".format(int(right_curverad))
+		# info_str = "{}, {}, {}, {}".format(detected, int(lane_distance_bot), int(lane_distance_mid), int(lane_distance_top))
 
-		cv2.putText(fit_image,cur_left, (50,580), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
-		cv2.putText(fit_image,cur_right, (50,640), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
-		cv2.putText(fit_image,info_str, (50,700), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
+		# cv2.putText(fit_image,cur_left, (50,580), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
+		# cv2.putText(fit_image,cur_right, (50,640), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
+		# cv2.putText(fit_image,info_str, (50,700), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
 		
-		# set the window
-		fit_image_resize = cv2.resize(fit_image, (640, 360))
-		result[:360,640:]=fit_image_resize
+		# # set the window
+		# fit_image_resize = cv2.resize(fit_image, (640, 360))
+		# result[:360,640:]=fit_image_resize
+
+		# # write the failure image for ananlysis
+		# if not detected:
+		# 	fileName = "./temp/"+str(self.image_counter)+".jpg"
+		# 	write_img = cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
+		# 	cv2.imwrite(fileName, write_img)
+		# ##############################################################
 		
 		return result
 
@@ -250,6 +275,7 @@ def images_test_tracker(src, dst):
 		cv2.imwrite(out_image, image_dist)
 
 	print("processed", pipeline.image_counter, "images")
+	print("Detected Failure: ", pipeline.detected_fail_counter)
 
 
 if __name__ == '__main__':

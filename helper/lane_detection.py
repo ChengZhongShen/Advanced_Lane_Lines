@@ -151,7 +151,7 @@ def get_polynomial(leftx, lefty, rightx, righty, img_size):
 
 	return left_fitx, right_fitx, ploty
 
-def lane_sanity_check(left_fitx, right_fitx, ploty, left_curverad, right_curverad):
+def lane_sanity_check(left_fitx, right_fitx, ploty):
 	'''
 	1. checking that they have similar curvature margin 10%
 	2. checking that they are separated by approximately right distance horizontally
@@ -159,17 +159,16 @@ def lane_sanity_check(left_fitx, right_fitx, ploty, left_curverad, right_curvera
 	3. Checking that they are roughly parallel, check the another side if 1280/4 margin 10%
 	'''
 	flag = True
-	curvature_diff = (abs(left_curverad-right_curverad))/((left_curverad+right_curverad)/2)
 	lane_distance_bot = right_fitx[720] - left_fitx[720]
 	lane_distance_mid = right_fitx[320] - left_fitx[320]
 	lane_distance_top = right_fitx[0] - left_fitx[0]
 	
-	# if curvature_diff > 0.2: flag = False 
+	# tranform calibration distence 1280/2 is 640, 5%(610-670) is good search, 15%(545-730) is detected
 	if ((lane_distance_bot < 545) or (lane_distance_bot > 730)): flag = False
 	if ((lane_distance_mid < 545) or (lane_distance_mid > 730)): flag = False
-	if ((lane_distance_top < 545) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
+	if ((lane_distance_top < 500) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
 
-	return flag, curvature_diff, lane_distance_bot, lane_distance_mid, lane_distance_top
+	return flag, lane_distance_bot, lane_distance_mid, lane_distance_top
 
 
 ###############################################################################
@@ -193,11 +192,11 @@ def test():
 	leftx, lefty, rightx, righty, out_img = find_lane_pixels(binary_warped)
 	left_fitx, right_fitx, ploty = get_polynomial(leftx, lefty, rightx, righty, img_size)
 	left_curverad, right_curverad = measure_curv(leftx, lefty, rightx, righty, ym_per_pix=30/720, xm_per_pix=3.7/700)
-	flag, curvature_diff, lane_distance_bot, lane_distance_mid, lane_distance_top = lane_sanity_check(left_fitx, right_fitx, ploty, left_curverad, right_curverad)
+	flag, lane_distance_bot, lane_distance_mid, lane_distance_top = lane_sanity_check(left_fitx, right_fitx, ploty)
 
 	cur_left = "left: {}".format(int(left_curverad))
 	cur_right = "right: {}".format(int(right_curverad))
-	info_str = "{}, {}, {}, {}, {}".format(flag, int(curvature_diff*100), int(lane_distance_bot), int(lane_distance_mid), int(lane_distance_top))
+	info_str = "{}, {}, {}, {}".format(flag, int(lane_distance_bot), int(lane_distance_mid), int(lane_distance_top))
 	out_img = fit_polynomial(binary_warped)
 	cv2.putText(out_img,cur_left, (50,580), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
 	cv2.putText(out_img,cur_right, (50,640), cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,255),3)
