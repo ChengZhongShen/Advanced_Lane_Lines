@@ -67,13 +67,13 @@ the detialed code is in the `image_process.py`, function `color_grid_thresh`, af
 ![alt text](./examples/test6_threshed_resize.jpg)
 
 
-#### 3. perspective transform
+#### 3. Perspective transform
 
 To implement perspective tranform, first need get the tranform parameter `M` and `Minv`.
 This is done by the `view_perspective.py`, just like camera_cal, get the parameter then write into a pickle file for further use.
 You could run "view_perspective.py" to see the transform.
 
-the view transform use manully adjust the 4 source piont.
+The view transform use manully adjust the 4 source piont.
 after serveral times adjust, the 4 poinst as below.
 
 ```python
@@ -95,7 +95,7 @@ The wraped binary image as below
 ![warpped_binary](./examples/test6_threshed_wraped_resize.jpg)
 
 
-#### 4. lane-line pixels detection and fit their positions with a polynomial
+#### 4. Lane-line pixels detection and fit their positions with a polynomial
 
 the `lane_detection.py` implement the lane-line pixels detection.
 the function `find_lane_pixels()` use a slide window to find the lane-line pixels. 
@@ -105,15 +105,15 @@ after get the lane_pixels, use `np.polyfit()` to get polynomial paratmeters, thi
 [ 1.96100345e-04 -2.96906479e-01  1.12235500e+03]
 ```
 
-to visualize the search result and fit polynomial, use `fit_polynomial()` function. the visualized result as below. show the search window/lane pixels/fit polynimial.
+To visualize the search result and fit polynomial, use `fit_polynomial()` function. the visualized result as below. show the search window/lane pixels/fit polynimial.
 
 ![alt text](./examples/test6_searched.png)
 
 #### 5. Calculate the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-the cacualtion is done in the `cal_curv.py`, the function `measure_curv()` used to calculate radius.
+The cacualtion is done in the `cal_curv.py`, the function `measure_curv()` used to calculate radius.
 
-first, transform the lane piont from pixels to meters.
+Firstly, transform the lane piont from pixels to meters,
 ```python
 # Transform pixel to meters
 leftx = leftx * xm_per_pix
@@ -123,9 +123,9 @@ righty = righty * ym_per_pix
 ```
 then fit these data use `np.polyfit()`
 
-after get the polynomial parameter, use the function R = (1+(2Ay+B)^2)^3/2 / (|2A|)
+After get the polynomial parameter, use the function R = (1+(2Ay+B)^2)^3/2 / (|2A|)
 
-for the offset, it is similar, tranfer pixel to meter, compare the lane center with picture center to get offse. these are in the function `measure_offset()`
+For the offset, it is similar, tranfer pixel to meter, compare the lane center with picture center to get offse. these are in the function `measure_offset()`
 
 
 #### 6. Plot lane area and display the radius and offset.
@@ -134,16 +134,16 @@ In the `Pipeline` class, use below code to visualzie the lane and caculation. to
 ```python
 def project_fit_lane_info(self, image, color=(0,255,255)):
 		"""
-		project the fited lane information to the image
-		use last 15 frame average data to avoid the number quick jump on screen.
-		"""
-		offset = np.mean(self.offset[-15:-1]) if len(self.offset) > self.smooth_number else np.mean(self.offset)
-		curverad = np.mean(self.radius[-15:-1]) if len(self.radius) > self.smooth_number else np.mean(self.radius)
-		direction = "right" if offset < 0 else "left"
-		str_cur = "Radius of Curvature = {}(m)".format(int(curverad))
-		str_offset = "Vehicle is {0:.2f}m ".format(abs(offset)) + "{} of center".format(direction)
-		cv2.putText(image, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
-		cv2.putText(image, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
+	project the fited lane information to the image
+	use last 15 frame average data to avoid the number quick jump on screen.
+	"""
+	offset = np.mean(self.offset[-15:-1]) if len(self.offset) > self.smooth_number else np.mean(self.offset)
+	curverad = np.mean(self.radius[-15:-1]) if len(self.radius) > self.smooth_number else np.mean(self.radius)
+	direction = "right" if offset < 0 else "left"
+	str_cur = "Radius of Curvature = {}(m)".format(int(curverad))
+	str_offset = "Vehicle is {0:.2f}m ".format(abs(offset)) + "{} of center".format(direction)
+	cv2.putText(image, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
+	cv2.putText(image, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
 ```
 
 The result as below picture.
@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
 ### Pipeline (video)
 
-to apply the pipeline on the video, you could run the gen_video.py. to generate video. the option is explained in the document descrition.
+To apply the pipeline on the video, you could run the gen_video.py. to generate video. the option is explained in the document description.
 the code is in line 66-84
 ```python
 if __name__ == "__main__":
@@ -184,29 +184,31 @@ if __name__ == "__main__":
 	# get_image("./test_video/challenge_video.mp4", "./test_images/challenge/", [i for i in range(1,16)])
 	# get_image("./test_video/harder_challenge_video.mp4", "./test_images/harder/", [i for i in range(1,47)])
 
-	# gen_video_tracker("project_video.mp4", subclip=True, debug_window=True) 
+	gen_video_tracker("project_video.mp4", subclip=True, debug_window=True) 
 	# gen_video_tracker("project_video.mp4", subclip=False, debug_window=False)
 
 	# gen_video_tracker("challenge_video.mp4", subclip=True, debug_window=True) 
-	gen_video_tracker("challenge_video.mp4", subclip=False, debug_window=True)
+	# gen_video_tracker("challenge_video.mp4", subclip=False, debug_window=True)
 	
 	# gen_video_tracker("harder_challenge_video.mp4", subclip=True, debug_window=True)
 	# gen_video_tracker("harder_challenge_video.mp4", subclip=False, debug_window=False)
 ```
 
 
-#### 1.pipeline issue
+#### 1. Pipeline issue
 
-With the image process established in before. we couldn't get the left/right lane correctly in whole video.
+With the image process established on single image. We couldn't get the left/right lane correctly in whole video.
 there is always noise which will affect the lane detection.
 
-for example, in some frame, the lan detection failed, as below picuture shows
-![detect fail](./examples/project_detect_fail_resize.png), the full size picture is [link to full size picture](./examples/project_detect_fail.png)
+For example, in some frame, the lan detection failed, as below picuture shows
+![detect fail](./examples/project_detect_fail_resize.png)
+
+The full size picture is [link to full size picture](./examples/project_detect_fail.png)
 
 
 #### 2.  add debug window on the pictures.
 
-to solve this problem, we need to know what happed when the process not work.
+To solve this problem, we need to know what happed when the process not work.
 so I add a function `project_debug_window()` in the class, and we also need to check the fit lane(fitted polynomial) is OK or not.
 To check the lane at y postion **720/bot, 360/mid, 0/top** the lane pixel distence and project to the final result picture for debug.
 build the function `lane_sanity_check()` in `lane_detection.py`
@@ -217,7 +219,11 @@ build the function `lane_sanity_check()` in `lane_detection.py`
 	lane_distance_top = right_fitx[0] - left_fitx[0]
 ```
 
-the debug picture as below, the full size could find [here](./examples/project_detect_fail_with_debug.png)
+The debug picture as below, the full size could find [here]
+
+This is done by the class "Pipeline"'s function `project_debug_window()`
+
+(./examples/project_detect_fail_with_debug.png)
 ![detect_fail_debug](./examples/project_detect_fail_with_debug_resize.png)
 
 
@@ -227,14 +233,14 @@ one detect failure and use recent data. As below picture show
 
 #### 3 project video
 
-use the pipeline and skip the noise frame, the pipeline work well on the project_video.mp4 well.
+Use the `Pipeline.pipeline()`, skip the noise frame, the pipeline work well on the project_video.mp4 well.
 
 The project video is here [project_video.mp4](./output_video/project_video.mp4).
 The videos with debug window could find here [project_video_with_debug_window.mp4](./output_video/project_video_with_debug_window.mp4).
 
 
 #### 4. challenge video
-To solve the challenge video problem. Improve the pipeline with image process and search method.
+To solve the challenge video problem. Improve the pipeline with image process.
 
 The challenge vidoe could be find here [challenge_video.mp4](./output_video/challenge_video.mp4).
 
@@ -242,7 +248,7 @@ The challenge video with debug window could be found here [challenge_video_with_
 
 
 #### 5. harder chanllenge
-The main change of pipeline for harder_challenge compare with challenge is the image process, the search method is same. 
+The main change of pipeline for harder_challenge compare with challenge is the image process, the search method is also changed. 
 
 The harder challenge vidoe could be find here [harder_challenge_video.mp4](./output_video/harder_challenge_video.mp4).
 
@@ -253,10 +259,13 @@ The harder challenge video with debug window could be found here [harder_challen
 ### Discussion
 
 #### 1. the time/efficiency issue
-The pipeline handle the image offline, so not consider the efficiency issue. In real application, the pipeline must hanle the image before the next image arrive. a quick search method should be applied.
+
+`find_lane_pixels()` (helpers/lane_detection.py) is used to search the whole warped image to find the lane pionts.
+
+The pipeline handle the image off-line, so not consider the efficiency issue. In real application, the pipeline must hanle the image before the next image arrive. a quick search method should be applied. 
 
 #### 2. lane_sanity check
-The lane_sanity_check function is very simple. To check if the fitted polynomial lines, just compare the fitted lines three y postions x distence to check if the fitted lines is OK. this is not work very well when the lane curve change dramticlly just like the in the harder_challenge video.
+The `lane_sanity_check()` (helpers/lane_detection.py) function is very simple. To check if the fitted polynomial lines, just compare the fitted lines three y postions x distence to check if the fitted lines is OK. this is not work very well when the lane curve change dramticlly just like the in the harder_challenge video.
 
 ---
 
