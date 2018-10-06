@@ -5,22 +5,6 @@ import os
 print("import pipeline...")
 from pipeline import *
 
-def gen_video(video, subclip=False):
-	'''
-	handle the project_video use pipeline function
-	'''
-	# check if handle the subclip
-	if subclip:
-		print("test on 5 second video")
-		clip = VideoFileClip("test_video/"+video).subclip(0,5)
-	else:
-		print("handle the whole video")
-		clip = VideoFileClip("test_video/"+video)
-	
-	white_output = "output_video/"+video
-	white_clip = clip.fl_image(pipeline)
-	white_clip.write_videofile(white_output, audio=False)
-
 def gen_video_tracker(video, subclip=False, debug_window=False):
 	'''
 	handle the project_video use pipeline function
@@ -56,9 +40,17 @@ def gen_video_tracker(video, subclip=False, debug_window=False):
 	white_output = "output_video/temp/"+video
 	white_clip.write_videofile(white_output, audio=False)
 
-	print("processed", pipeline.image_counter, "images")
-	print("Detected Failure: ", pipeline.fit_fail_counter)
-	print("Search Failure: ", pipeline.search_fail_counter)
+	# write the information to the consel
+	print("processed {} images".format(pipeline.image_counter))
+	print("Detected Failure: {}".format(pipeline.fit_fail_counter))
+	print("Search Failure: {}".format(pipeline.search_fail_counter))
+	print("The video is at ./output_video/temp/")
+
+	# write the information to log file
+	with open("./output_video/temp/log.txt", "w") as text_file:
+		print("processed {} images".format(pipeline.image_counter), file=text_file)
+		print("Detected Failure: {}".format(pipeline.fit_fail_counter), file=text_file)
+		print("Search Failure: {}".format(pipeline.search_fail_counter), file=text_file)
 
 def get_image(video, dst, frame_list):
 	'''
@@ -72,15 +64,21 @@ def get_image(video, dst, frame_list):
 		clip.save_frame(imgpath, t)
 
 if __name__ == "__main__":
+	"""
+	choise one line to uncoment and run the file, gen the video.
+	the video will be output to ./outpu_videos/temp/
+	option: subclip = True, just use (0-5) second video, False, use total long video.
+	option: debug_window = True, project the debug window on the up-right corner of the screen to visualize the image handle process
+								and write the fit lane failure/search lane failure image to ./output_videos/temp/images
+	"""
 	# get_image("./test_video/challenge_video.mp4", "./test_images/challenge/", [i for i in range(1,16)])
 	# get_image("./test_video/harder_challenge_video.mp4", "./test_images/harder/", [i for i in range(1,47)])
 
-	# # gen project video
-	# gen_video_tracker("project_video.mp4", subclip=True) 
-	# gen_video_tracker("project_video.mp4", subclip=False)
+	gen_video_tracker("project_video.mp4", subclip=True, debug_window=True) 
+	# gen_video_tracker("project_video.mp4", subclip=False, debug_window=False)
 
-	# gen_video_tracker("challenge_video.mp4", subclip=True) 
-	# gen_video_tracker("challenge_video.mp4", subclip=False)
+	# gen_video_tracker("challenge_video.mp4", subclip=True, debug_window=False) 
+	# gen_video_tracker("challenge_video.mp4", subclip=False, debug_window=False)
 	
-	# gen_video_tracker("harder_challenge_video.mp4", subclip=False, debug_window=True)
-	gen_video_tracker("harder_challenge_video.mp4", subclip=False, debug_window=False)
+	# gen_video_tracker("harder_challenge_video.mp4", subclip=True, debug_window=True)
+	# gen_video_tracker("harder_challenge_video.mp4", subclip=False, debug_window=False)

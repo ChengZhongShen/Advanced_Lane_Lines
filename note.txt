@@ -1,5 +1,0 @@
-1. put all the test relate line into a function test. just comment test implement
-2. for the image process, a fucntion that take image_process function/ *args and scr/dst foler to apply the function into all the images in the file.
-
-
-cv2.putText(image, "Str", (x,y), cv2.FONT_HERSHEY_SIMLEEX,1,(255,255,255),2)
