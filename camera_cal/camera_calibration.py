@@ -1,6 +1,6 @@
 # Camera calibration file, include two function.
 # main(), do the camera cal and write the result to a pickle file for further use
-# test(), 
+# test(), check the if the pickle file and the calibration parameters work
 import numpy as np 
 import cv2
 import glob

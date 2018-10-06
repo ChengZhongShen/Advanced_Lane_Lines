@@ -429,4 +429,4 @@ def test(binary_image_file, search="v1"):
 
 if __name__ == '__main__':
 	# test('../output_images/project/wraped/test6.jpg')
-	test('../output_images/harder/wraped/17.jpg', search="v2")
+	test('../examples/test6_threshed_wraped.jpg', search="v1")

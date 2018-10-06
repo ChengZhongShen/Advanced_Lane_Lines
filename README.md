@@ -18,7 +18,7 @@ The goals / steps of this project are the following:
 
 ### Camera Calibration
 
-#### 1. use the **opencv** `findChessboardCorners()` and "`calibrateCamera()` funtion to implement the camera calibration.
+#### 1. use the **opencv** `findChessboardCorners()` and `calibrateCamera()` funtion to implement the camera calibration.
 
 The code for this step in the `camera_calibration.py` which located in **camera_cal** folder.  
 run the `camera_calibration.py` to process the calibration.
@@ -38,16 +38,18 @@ the result as below
 
 ![undistort_image](./camera_cal/undistort_example.png)
 
-### Pipeline (single images)
+---
 
-`pipeline.py` include the function `pipeline()` which used to handle the image. You could run "pipeline.py" to see the pipeline effect.
+### Pipeline (single image)
+
+`pipeline.py` include the class Pipeline, the function `pipeline()` which used to handle the image. You could run "pipeline.py" to see the pipeline effect.
 
 The process described below:
 
 #### 1. distortion-corrected image.
 
 use the paremeter from pickle file *camera_cal.p* (this is done by the function: `get_camera_cal()`) use the `cv2.undistort` to get the undistort image,the image showed below(resized to 640X360 to fit the file.):
-![undistort_image](./output_images/undistort/test6_resize.jpg)
+![undistort_image](./examples/test6_resize.jpg)
 
 #### 2. Threshold the image.
 
@@ -62,7 +64,7 @@ This is a combination of color and gradient thresholds to generate a binary imag
 in color: it use a HLS's s channel, for gradient, use x direction gradient. 
 the detialed code is in the `image_process.py`, function `color_grid_thresh`, after apply the threshold, the image as below.
 
-![alt text](./output_images/threshed/test6_resize.jpg)
+![alt text](./examples/test6_threshed_resize.jpg)
 
 
 #### 3. perspective transform
@@ -88,11 +90,9 @@ dst = np.float32(
 ```
 ![alt text](./helper/view_tran.png)
 
-To test the pickle file and tansform work well, use the test() function to test, the result is at [wrapped_color](./output_images/wraped_color)
-
 The wraped binary image as below
 
-![warpped_binary](./output_images/wraped/test6_resize.jpg)
+![warpped_binary](./examples/test6_threshed_wraped_resize.jpg)
 
 
 #### 4. lane-line pixels detection and fit their positions with a polynomial
@@ -107,7 +107,7 @@ after get the lane_pixels, use `np.polyfit()` to get polynomial paratmeters, thi
 
 to visualize the search result and fit polynomial, use `fit_polynomial()` function. the visualized result as below. show the search window/lane pixels/fit polynimial.
 
-![alt text](./output_images/lane_search/test6.png)
+![alt text](./examples/test6_searched.png)
 
 #### 5. Calculate the radius of curvature of the lane and the position of the vehicle with respect to center.
 
@@ -130,47 +130,85 @@ for the offset, it is similar, tranfer pixel to meter, compare the lane center w
 
 #### 6. Plot lane area and display the radius and offset.
 
-In the `pipeline`, use below code to visualzie the lane and caculation.
+In the `Pipeline` class, use below code to visualzie the lane and caculation. to avoid number quick jump in the screen, display the 15 frames average.
 ```python
-# draw the lane to the undist image
-	result = draw_lane_find(image_undist, image_warped, Minv, leftx, lefty, rightx, righty)
-	result = draw_lane_fit(result, image_warped, Minv, left_fitx, right_fitx, ploty)
-
-	# write curverad and offset on to result image
-	direction = "right" if offset < 0 else "left"
-	str_cur = "Radius of Curvature = {0:.2f}(m)".format(curverad)
-	str_offset = "Vehicle is {0:.2f}m ".format(offset) + "{} of center".format(direction)
-	cv2.putText(result, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
-	cv2.putText(result, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),2)
-
+def project_fit_lane_info(self, image, color=(0,255,255)):
+		"""
+		project the fited lane information to the image
+		use last 15 frame average data to avoid the number quick jump on screen.
+		"""
+		offset = np.mean(self.offset[-15:-1]) if len(self.offset) > self.smooth_number else np.mean(self.offset)
+		curverad = np.mean(self.radius[-15:-1]) if len(self.radius) > self.smooth_number else np.mean(self.radius)
+		direction = "right" if offset < 0 else "left"
+		str_cur = "Radius of Curvature = {}(m)".format(int(curverad))
+		str_offset = "Vehicle is {0:.2f}m ".format(abs(offset)) + "{} of center".format(direction)
+		cv2.putText(image, str_cur, (50,60), cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
+		cv2.putText(image, str_offset, (50,120), cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
 ```
 
 The result as below picture.
 
-![alt text](./output_images/test6_resize.jpg)
+![alt text](./examples/test6_lane_projected.png)
 
-with currect pipeline, it works on all the test images. you could find the find at [images_pipeline_tested](./output_images)
+In the pipeline.py, you could go to line 487 to 498, choice test on one image or a batch of image to see how the pipeline work.
+```python
+if __name__ == '__main__':
+	"""
+	image_test_tracker(), test pipeline on one image and show the image on screen
+	images_test_tracker(), test pipeline on images and write the result to related folder
+	"""
+	image_test_tracker("./test_images/test6.jpg", "project", debug_window=False)
+	# image_test_tracker("test_images/challenge/1.jpg", "challenge", debug_window=True)
+	# image_test_tracker("test_images/harder/1.jpg", "harder", debug_window=True)
+
+	# images_test_tracker("test_images/", "output_images/", "project", debug_window=True)
+	# images_test_tracker("test_images/challenge/", "output_images/challenge/", "challenge", debug_window=True)
+	# images_test_tracker("test_images/harder/", "output_images/harder/", "harder", debug_window=True)
+```
 
 ---
 
 ### Pipeline (video)
 
-this is done by the `video.py`, generate the video using pipeline.
+to apply the pipeline on the video, you could run the gen_video.py. to generate video. the option is explained in the document descrition.
+the code is in line 66-84
+```python
+if __name__ == "__main__":
+	"""
+	choise one line to uncoment and run the file, gen the video.
+	the video will be output to ./outpu_videos/temp/
+	option: subclip = True, just use (0-5) second video, False, use total long video.
+	option: debug_window = True, project the debug window on the up-right corner of the screen to visualize the image handle process
+								and write the fit lane failure/search lane failure image to ./output_videos/temp/images
+	"""
+	# get_image("./test_video/challenge_video.mp4", "./test_images/challenge/", [i for i in range(1,16)])
+	# get_image("./test_video/harder_challenge_video.mp4", "./test_images/harder/", [i for i in range(1,47)])
 
-#### 1.video output version1
+	# gen_video_tracker("project_video.mp4", subclip=True, debug_window=True) 
+	# gen_video_tracker("project_video.mp4", subclip=False, debug_window=False)
 
-With current threshold and setup, most of the time it work for the project video.
-Here's a [link to my video result](./output_video/v1/project_video.mp4)
+	# gen_video_tracker("challenge_video.mp4", subclip=True, debug_window=True) 
+	gen_video_tracker("challenge_video.mp4", subclip=False, debug_window=True)
+	
+	# gen_video_tracker("harder_challenge_video.mp4", subclip=True, debug_window=True)
+	# gen_video_tracker("harder_challenge_video.mp4", subclip=False, debug_window=False)
+```
 
-But in some frame, the lan detection failed, as below picuture shows
+
+#### 1.pipeline issue
+
+With the image process established in before. we couldn't get the left/right lane correctly in whole video.
+there is always noise which will affect the lane detection.
+
+for example, in some frame, the lan detection failed, as below picuture shows
 ![detect fail](./examples/project_detect_fail_resize.png), the full size picture is [link to full size picture](./examples/project_detect_fail.png)
 
----
 
-#### 2. the current pipeline don't has the check method to verify if the searched lane is correct or reasonal.
+#### 2.  add debug window on the pictures.
 
-should check the founded lane is reasonable and discard the wrong finding.
-check the lane at y postion **720/bot, 360/mid, 0/top** the lane pixel distence and project to the final result picture for debug.
+to solve this problem, we need to know what happed when the process not work.
+so I add a function `project_debug_window()` in the class, and we also need to check the fit lane(fitted polynomial) is OK or not.
+To check the lane at y postion **720/bot, 360/mid, 0/top** the lane pixel distence and project to the final result picture for debug.
 build the function `lane_sanity_check()` in `lane_detection.py`
 
 ```python
@@ -182,27 +220,43 @@ build the function `lane_sanity_check()` in `lane_detection.py`
 the debug picture as below, the full size could find [here](./examples/project_detect_fail_with_debug.png)
 ![detect_fail_debug](./examples/project_detect_fail_with_debug_resize.png)
 
-The videos with debug window could find [here](./output_video/v1_with_debug_window/project_video.mp4)
 
-### 2. improvement the pipeline with lane check
+When lane detect is False. use the recent data to project the lane area and culcualte the lane radius and car offset.
+one detect failure and use recent data. As below picture show
+![project_with_previous_fit_lines](./examples/576_resize.jpg)
 
-if the lane check is OK, attach the result to `pipeline.left` and `pipeline.right`.
-```python
-# tranform calibration distence 1280/2 is 640, 5%(610-670) is good search, 15%(545-730) is detected
-	if ((lane_distance_bot < 545) or (lane_distance_bot > 730)): flag = False
-	if ((lane_distance_mid < 545) or (lane_distance_mid > 730)): flag = False
-	if ((lane_distance_top < 500) or (lane_distance_top > 730)): flag = False # change top to 500, in some frame, the road in not flat, the lane will be small far from camera
-```
-when lane detect is False. use the recent data to project the lane area and culcualte the lane radius and car offset.
-one detect failure and use recent data project as below picture show.
-[detect_fail_projected](./examples/576_resize.jpg)
+#### 3 project video
+
+use the pipeline and skip the noise frame, the pipeline work well on the project_video.mp4 well.
+
+The project video is here [project_video.mp4](./output_video/project_video.mp4).
+The videos with debug window could find here [project_video_with_debug_window.mp4](./output_video/project_video_with_debug_window.mp4).
+
+
+#### 4. challenge video
+To solve the challenge video problem. Improve the pipeline with image process and search method.
+
+The challenge vidoe could be find here [challenge_video.mp4](./output_video/challenge_video.mp4).
+
+The challenge video with debug window could be found here [challenge_video_with_debug_window](./output_video/challenge_video_with_debug_window.mp4).
+
+
+#### 5. harder chanllenge
+The main change of pipeline for harder_challenge compare with challenge is the image process, the search method is same. 
+
+The harder challenge vidoe could be find here [harder_challenge_video.mp4](./output_video/harder_challenge_video.mp4).
+
+The harder challenge video with debug window could be found here [harder_challenge_video_with_debug_window.mp4](./output_video/harder_challenge_video_with_debug_window.mp4).
 
 ---
 
 ### Discussion
 
-#### 1. the challenge_video.
-	current pipeline not worked for challenge_video. need further work on chanllenge_video
+#### 1. the time/efficiency issue
+The pipeline handle the image offline, so not consider the efficiency issue. In real application, the pipeline must hanle the image before the next image arrive. a quick search method should be applied.
+
+#### 2. lane_sanity check
+The lane_sanity_check function is very simple. To check if the fitted polynomial lines, just compare the fitted lines three y postions x distence to check if the fitted lines is OK. this is not work very well when the lane curve change dramticlly just like the in the harder_challenge video.
 
 ---
 
@@ -217,5 +271,5 @@ one detect failure and use recent data project as below picture show.
 * **test_video** three video for testing the lane detection
 
 * **pipeline.py** the code which use to hande the images. the actual lane dection happend.
-* **requirement.txt** the python package list in local machine
-* **video.py** the code with use "pipeline" to handle the vidoe and generate the output video.
+* **requirements.txt** the python package list in local machine
+* **gen_video.py** the code with use "pipeline" to handle the vidoe and generate the output video.

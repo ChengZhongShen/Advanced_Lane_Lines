@@ -78,10 +78,13 @@ def wrap_images(src, dst):
 		cv2.imwrite(out_image, image_wraped)
 
 if __name__ == '__main__':
+	"""
+	to run these function for challenge and harder, you should create the folders fist.
+	"""
+	# undistort_images("../test_images/", "../output_images/")
+	# undistort_images("../test_images/challenge/", "../output_images/")
+	# undistort_images("../test_images/harder/", "../output_images/")
 
-	# undistort_images("../test_images/challenge/", "../output_images/challenge/undistort/")
-	# undistort_images("../test_images/harder/", "../output_images/harder/undistort/")
-
-	# wrap_images("../output_images/challenge/threshed/", "../output_images/challenge/wraped/")
-	wrap_images("../output_images/harder/threshed/", "../output_images/harder/wraped/")
+	wrap_images("../output_images/", "../examples/")
+	# wrap_images("../output_images/harder/threshed/", "../output_images/harder/wraped/")
 	# wrap_images("../output_images/harder/undistort/", "../output_images/harder/wraped_color/")

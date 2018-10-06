@@ -489,10 +489,10 @@ if __name__ == '__main__':
 	image_test_tracker(), test pipeline on one image and show the image on screen
 	images_test_tracker(), test pipeline on images and write the result to related folder
 	"""
-	image_test_tracker("./test_images/test1.jpg", "project", debug_window=True)
+	# image_test_tracker("./test_images/test6.jpg", "project", debug_window=False)
 	# image_test_tracker("test_images/challenge/1.jpg", "challenge", debug_window=True)
 	# image_test_tracker("test_images/harder/1.jpg", "harder", debug_window=True)
 
-	# images_test_tracker("test_images/", "output_images/", "project", debug_window=True)
+	images_test_tracker("test_images/", "output_images/", "project", debug_window=True)
 	# images_test_tracker("test_images/challenge/", "output_images/challenge/", "challenge", debug_window=True)
 	# images_test_tracker("test_images/harder/", "output_images/harder/", "harder", debug_window=True)

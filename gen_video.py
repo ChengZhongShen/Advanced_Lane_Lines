@@ -77,7 +77,7 @@ if __name__ == "__main__":
 	gen_video_tracker("project_video.mp4", subclip=True, debug_window=True) 
 	# gen_video_tracker("project_video.mp4", subclip=False, debug_window=False)
 
-	# gen_video_tracker("challenge_video.mp4", subclip=True, debug_window=False) 
+	# gen_video_tracker("challenge_video.mp4", subclip=True, debug_window=True) 
 	# gen_video_tracker("challenge_video.mp4", subclip=False, debug_window=False)
 	
 	# gen_video_tracker("harder_challenge_video.mp4", subclip=True, debug_window=True)

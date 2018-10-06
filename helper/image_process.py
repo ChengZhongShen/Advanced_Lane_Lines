@@ -448,7 +448,7 @@ if __name__ == "__main__":
 
 	# test_draw()
 	# test_thresh_image("../test_images/challenge/15.jpg", s_thresh=(50,150), sx_thresh=(20, 100))
-	# test_thresh_images("../output_images/challenge/undistort/", "../output_images/challenge/threshed/", s_thresh=(50,150), sx_thresh=(20, 100))
+	test_thresh_images("../output_images/", "../examples/", s_thresh=(50,150), sx_thresh=(20, 100))
 	# test_yellow_filter("../output_images/challenge/undistort/1.jpg")
 	# test_yellow_grid_thresh_images("../output_images/challenge/undistort/", "../output_images/challenge/threshed/", y_low=(10,50,0), y_high=(30,255,255), sx_thresh=(20, 100))
 	# test_white_filter("../output_images/challenge/undistort/1.jpg")
@@ -456,7 +456,7 @@ if __name__ == "__main__":
 
 	# test_yellow_white_thresh_images("../output_images/harder/undistort/", "../output_images/harder/threshed/", 
 										# y_low=(10,50,0), y_high=(30,255,255), w_low=(190,190,190), w_high=(255,255,255))
-	test_y_w_dynamic_images("../output_images/harder/undistort/", "../output_images/harder/threshed/", 
-								y_low=(10,0,0), y_high=(30,255,255), w_low=(180,180,180), w_high=(255,255,255))
+	# test_y_w_dynamic_images("../output_images/harder/undistort/", "../output_images/harder/threshed/", 
+								# y_low=(10,0,0), y_high=(30,255,255), w_low=(180,180,180), w_high=(255,255,255))
 	# test_color_grid_thresh_dynamic("../output_images/harder/undistort/", "../output_images/harder/threshed/", 
 								# s_thresh=(50,150), sx_thresh=(20, 100))
