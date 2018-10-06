@@ -28,10 +28,18 @@ def get_perspective_trans():
 
 	return M, Minv
 
-def undistort_images(src, dst, mtx, dist):
+def undistort_images(src, dst):
 	"""
 	undistort the images in src folder to dst folder
 	"""
+	# load dst, mtx
+	pickle_file = open("../camera_cal/camera_cal.p", "rb")
+	dist_pickle = pickle.load(pickle_file)
+	mtx = dist_pickle["mtx"]  
+	dist = dist_pickle["dist"]
+	pickle_file.close()
+	
+	# loop the image folder
 	image_files = glob.glob(src+"*.jpg")
 	for idx, file in enumerate(image_files):
 		print(file)
@@ -44,27 +52,18 @@ def undistort_images(src, dst, mtx, dist):
 		image_dist = cv2.cvtColor(image_dist, cv2.COLOR_RGB2BGR)
 		cv2.imwrite(out_image, image_dist)
 
-def thresh_images(src, dst, s_thresh, sx_thresh):
-	"""
-	apply the thresh to images in a src folder and output to dst foler
-	"""
-	image_files = glob.glob(src+"*.jpg")
-	for idx, file in enumerate(image_files):
-		print(file)
-		img = mpimg.imread(file)
-		image_threshed = color_grid_thresh(img, s_thresh=s_thresh, sx_thresh=sx_thresh)
-		file_name = file.split("\\")[-1]
-		print(file_name)
-		out_image = dst+file_name
-		print(out_image)
-		# convert  binary to RGB, *255, to visiual, 1 will not visual after write to file
-		image_threshed = cv2.cvtColor(image_threshed*255, cv2.COLOR_GRAY2RGB)
-		cv2.imwrite(out_image, image_threshed)
 
-def wrap_images(src, dst, M, img_size):
+def wrap_images(src, dst):
 	"""
 	apply the wrap to images
 	"""
+	# load M, Minv
+	img_size = (1280, 720)
+	pickle_file = open("../helper/trans_pickle.p", "rb")
+	trans_pickle = pickle.load(pickle_file)
+	M = trans_pickle["M"]
+	Minv = trans_pickle["Minv"]
+	# loop the file folder
 	image_files = glob.glob(src+"*.jpg")
 	for idx, file in enumerate(image_files):
 		print(file)
@@ -75,4 +74,14 @@ def wrap_images(src, dst, M, img_size):
 		out_image = dst+file_name
 		print(out_image)
 		# no need to covert RGB to BGR since 3 channel is same
+		image_wraped = cv2.cvtColor(image_wraped, cv2.COLOR_RGB2BGR)
 		cv2.imwrite(out_image, image_wraped)
+
+if __name__ == '__main__':
+
+	# undistort_images("../test_images/challenge/", "../output_images/challenge/undistort/")
+	# undistort_images("../test_images/harder/", "../output_images/harder/undistort/")
+
+	# wrap_images("../output_images/challenge/threshed/", "../output_images/challenge/wraped/")
+	wrap_images("../output_images/harder/threshed/", "../output_images/harder/wraped/")
+	# wrap_images("../output_images/harder/undistort/", "../output_images/harder/wraped_color/")
