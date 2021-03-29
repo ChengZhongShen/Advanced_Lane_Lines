@@ -23,7 +23,7 @@ Pillow==5.2.0
 post==1.0.2
 prompt-toolkit==1.0.15
 public==1.0.3
-Pygments==2.2.0
+Pygments==2.7.4
 pyparsing==2.2.0
 PySide2==5.11.1
 python-dateutil==2.7.3
