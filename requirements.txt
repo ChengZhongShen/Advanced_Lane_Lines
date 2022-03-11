@@ -19,7 +19,7 @@ numpy==1.15.0
 opencv-python==3.4.2.17
 parso==0.3.1
 pickleshare==0.7.4
-Pillow==5.2.0
+Pillow==9.0.1
 post==1.0.2
 prompt-toolkit==1.0.15
 public==1.0.3
